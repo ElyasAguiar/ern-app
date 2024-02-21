@@ -6,7 +6,7 @@
   </a>
 </p>
 
-> O Ern-App é um app que calcula estruturas reticuladas de nanocompósitos
+> Cálculo de viga isostática bi-apoiada com carga distribuida"
 
 ### 🏠 [Homepage](https://ern-app.aguiar.dev)
 
