@@ -1,37 +1,61 @@
-from collections import namedtuple
-import altair as alt
-import math
-import pandas as pd
 import streamlit as st
+import numpy as np
+import matplotlib.pyplot as plt
 
-"""
-# Bem-vindo ao ERN!
+st.set_option('deprecation.showPyplotGlobalUse', False)
 
-Edite `app/app.py` para personalizar este aplicativo para o desejo do seu coração :heart:
 
-Se você tiver alguma dúvida, confira nossa [documentação](https://docs.streamlit.io)  e [fóruns
-da comunidade](https://discuss.streamlit.io).
+def calcular_esforcos_internos(L, E, A, Q):
+    x = np.linspace(0, L, 1000)  # Pontos ao longo do comprimento da viga
+    w = Q * x / 2  # Função de carga distribuída
 
-Enquanto isso, abaixo está um exemplo do que você pode fazer com apenas algumas linhas de código:
-"""
+    # Reações de apoio
+    R1 = Q * L / 2
+    R2 = Q * L / 2
 
-with st.echo(code_location='below'):
-    total_points = st.slider("Number of points in spiral", 1, 5000, 2000)
-    num_turns = st.slider("Number of turns in spiral", 1, 100, 9)
+    V = R1 - Q * x  # Esforço cortante
+    M = R1 * x - (Q * x ** 2) / 2  # Momento fletor
 
-    Point = namedtuple('Point', 'x y')
-    data = []
+    # Plotar os esforços internos
+    plt.figure(figsize=(10, 6))
+    plt.subplot(2, 1, 1)
+    plt.plot(x, V)
+    plt.title('Esforço Cortante')
+    plt.xlabel('Posição ao longo da viga')
+    plt.ylabel('Esforço Cortante (N)')
+    plt.grid(True)
+    plt.xlim(0, L)  # Limites do eixo x
+    plt.text(0, R1, 'Apoio 1', fontsize=10, ha='right')
+    plt.text(L, R2, 'Apoio 2', fontsize=10, ha='left')
 
-    points_per_turn = total_points / num_turns
+    plt.subplot(2, 1, 2)
+    plt.plot(x, M)
+    plt.title('Momento Fletor')
+    plt.xlabel('Posição ao longo da viga')
+    plt.ylabel('Momento Fletor (Nm)')
+    plt.grid(True)
+    plt.xlim(0, L)  # Limites do eixo x
+    plt.text(0, 0, 'Apoio 1', fontsize=10, ha='right')
+    plt.text(L, 0, 'Apoio 2', fontsize=10, ha='left')
 
-    for curr_point_num in range(total_points):
-        curr_turn, i = divmod(curr_point_num, points_per_turn)
-        angle = (curr_turn + 1) * 2 * math.pi * i / points_per_turn
-        radius = curr_point_num / total_points
-        x = radius * math.cos(angle)
-        y = radius * math.sin(angle)
-        data.append(Point(x, y))
+    st.pyplot()
 
-    st.altair_chart(alt.Chart(pd.DataFrame(data), height=500, width=500)
-        .mark_circle(color='#0068c9', opacity=0.5)
-        .encode(x='x:Q', y='y:Q'))
+
+def main():
+    st.title('Cálculo de Esforços Internos em uma Viga Biapoiada')
+
+    # Entradas do usuário
+    L = st.number_input('Comprimento da viga (m)', min_value=0.1, step=0.1, value=1.0)
+    E = st.number_input('Módulo de Elasticidade (Pa)', min_value=1e9, step=1e9, value=2.1e11)
+    A = st.number_input('Área da seção transversal (m^2)', min_value=0.01, step=0.01, value=0.1)
+    Q = st.number_input('Carga distribuída (N/m)', min_value=0.0, step=100.0, value=1000.0)
+
+    # Calcular esforços internos quando o botão for pressionado
+    if st.button('Calcular Esforços Internos'):
+        calcular_esforcos_internos(L, E, A, Q)
+    if st.button('Limpar formulário'):
+        st.empty()
+
+
+if __name__ == "__main__":
+    main()
